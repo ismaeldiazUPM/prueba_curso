@@ -1,7 +1,2 @@
-pyomo
-numpy
-pandas
-matplotlib
-highspy
-scipy
 idaes-pse
+highspy
