@@ -14,17 +14,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install the dependencies
+
+      - name: Install dependencies
         run: |
-          python -m pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          # Instalamos explícitamente los paquetes necesarios para que no falle el build
+          pip install jupyterlite-core jupyterlite-pyodide-kernel
+          # Si tienes dependencias extra en tu repo, descomenta la siguiente línea:
+          # pip install -r requirements.txt
+          
       - name: Build the JupyterLite site
         run: |
           cp README.md content
           jupyter lite build --contents content --output-dir dist
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -36,38 +44,11 @@ jobs:
     permissions:
       pages: write
       id-token: write
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     runs-on: ubuntu-latest
-steps:
-      # Este paso probablemente ya lo tienes
-      - name: Checkout
-        uses: actions/checkout@v3
-      
-      # ---------------------------------------------------------
-      # 1. AÑADE ESTE PASO: Configurar el entorno de Python
-      # ---------------------------------------------------------
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      # ---------------------------------------------------------
-      # 2. AÑADE ESTE PASO: Instalar JupyterLite y el kernel
-      # ---------------------------------------------------------
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install jupyterlite-core jupyterlite-pyodide-kernel
-
-      # ---------------------------------------------------------
-      # 3. TU PASO ACTUAL (déjalo exactamente como lo tienes, 
-      #    pero asegúrate de que vaya después de los de arriba)
-      # ---------------------------------------------------------
-      - name: Build the JupyterLite site
-        run: |
-          cp README.md content
-          jupyter lite build # (o el resto de comandos que ya tengas)
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
